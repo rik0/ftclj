@@ -25,20 +25,21 @@
 (defn quicksort
   ([coll less? k]
      (letfn [(qs [coll k]
-                (if (empty? coll) (k ())
-                    (let [pivot (first coll)
-                          coll1 (rest coll)]
-                      (partition coll1
-                                 (fn [x] (less? x pivot))
-                                 (fn [less-than greater-than]
-                                   (qs greater-than
+                 (if (empty? coll) #(k ())
+                     (let [[pivot & coll1] coll]
+                       (partition coll1
+                                  (fn [x] (less? x pivot))
+                                  (fn [less-than greater-than]
+                                    (fn []
+                                      (qs greater-than
                                           (fn [sorted-gt]
-                                            (qs less-than
-                                                (fn [sorted-lt]
-                                                  (append sorted-lt (cons pivot sorted-gt) k))))))))))]
-       (qs coll k)))
-  ([coll less?]
-     (quicksort coll less? identity)))
+                                            (fn []
+                                              (qs less-than
+                                                  (fn [sorted-lt]
+                                                    (append sorted-lt (cons pivot sorted-gt) k))))))))))))]
+             (trampoline (qs coll k))))
+     ([coll less?]
+        (quicksort coll less? identity)))
         
      
     
