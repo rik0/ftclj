@@ -1,20 +1,41 @@
 (ns cps
   (:refer-clojure :exclude [append partition]))
 
-(defn append [lst1 lst2 k]
+(defn append-notramp [lst1 lst2 k]
   (cond
    (empty? lst1) (k lst2)
    :else (recur (rest lst1) lst2 
                  (fn [rst]
                    (k (cons (first lst1) rst))))))
 
-(defn partition [coll p? k]
+(defn append [lst1 lst2 k]
+  (cond
+   (empty? lst1) #(k lst2)
+   :else (recur (rest lst1) lst2 
+                 (fn [rst]
+                   #(k (cons (first lst1) rst))))))
+
+(defn partition-notramp [coll p? k]
   (loop [coll coll k k]
     (cond
      (empty? coll) (k () ())
      (p? (first coll)) (recur (rest coll)
                               (fn [p-true p-false]
                                 (k (cons (first coll) p-true)
+                                   p-false)))
+     :else (recur (rest coll)
+                  (fn [p-true p-false]
+                    (k p-true
+                       (cons (first coll)
+                             p-false)))))))
+
+(defn partition [coll p? k]
+  (loop [coll coll k k]
+    (cond
+     (empty? coll) #(k () ())
+     (p? (first coll)) (recur (rest coll)
+                              (fn [p-true p-false]
+                                #(k (cons (first coll) p-true)
                                    p-false)))
      :else (recur (rest coll)
                   (fn [p-true p-false]
@@ -37,7 +58,7 @@
                                               (qs less-than
                                                   (fn [sorted-lt]
                                                     (append sorted-lt (cons pivot sorted-gt) k))))))))))))]
-             (trampoline (qs coll k))))
+       (trampoline (qs coll k))))
      ([coll less?]
         (quicksort coll less? identity)))
         
