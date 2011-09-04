@@ -4,7 +4,7 @@
 (defn append [lst1 lst2 k]
   (cond
    (empty? lst1) (k lst2)
-   :else (append (rest lst1) lst2 
+   :else (recur (rest lst1) lst2 
                  (fn [rst]
                    (k (cons (first lst1) rst))))))
 
