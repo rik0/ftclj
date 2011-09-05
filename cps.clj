@@ -15,6 +15,13 @@
                  (fn [rst]
                    #(k (cons (first lst1) rst))))))
 
+(defn append-alt [lst1 lst2 k]
+  (if-let [[lst1-head & lst1-tail] lst1]
+    (recur lst1-tail lst2 
+           (fn [rst]
+             #(k (cons lst1-head rst))))
+    #(k lst2)))
+
 (defn partition-notramp [coll p? k]
   (loop [coll coll k k]
     (cond
